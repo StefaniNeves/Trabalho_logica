@@ -13,7 +13,7 @@ O objetivo é automatizar o processo de verificação da **validade** ou **satis
 ## ⚙️ Decisões de Implementação
 
 ### 1) Linguagem Utilizada
-- [ ] Implementar em **Python**, pela sua simplicidade e expressividade em manipulação de árvores, listas e estruturas de dados dinâmicas.  
+Implementar em **Python**, pela sua simplicidade e expressividade em manipulação de árvores, listas e estruturas de dados dinâmicas.  
 
 ---
 
