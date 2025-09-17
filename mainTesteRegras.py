@@ -45,6 +45,6 @@ def testar_beta():
     print("Expansão de F(¬p):", Regras.expandir_beta(neg))
 
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     testar_alpha()
     testar_beta()
