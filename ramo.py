@@ -1,21 +1,26 @@
 from formula import Formula
 
 class Ramo:
-    def __init__(self, formulas):
-        self.formulas = formulas  if formulas else []
+    def __init__(self, formulas=None):
+        self.formulas = formulas if formulas else []
+        self.expanded = set()  # fórmulas já expandidas neste ramo
     
     def contem_contradicao(self):
         valores = {}
-        for formulas in self.formulas:
+        for formula in self.formulas:
             if formula.is_atom():
-                if formula.atomo in valores:
-                    if valores[formula.atomo] != formula.valor:
-                        return True
+                atomo = formula.atomo
+                valor = formula.rotulo
+                if atomo in valores:
+                    if valores[atomo] != valor:
+                        return True  # achou Tp e Fp no mesmo ramo
                 else:
-                    valores[formula.atomo] = formula.valor
+                    valores[atomo] = valor
         return False
-    
-    def esta_staurado(self):
-        return all(f.id_atom() for f in self.formulas)
+
+    def esta_saturado(self):
+        # saturado = só contém fórmulas atômicas
+        return all(f.is_atom() for f in self.formulas)
+
     def __repr__(self):
-        return "[" + ",".join(str(f) for f in self.formulas) + "]"
+        return "[" + ", ".join(str(f) for f in self.formulas) + "]"
