@@ -1,79 +1,67 @@
-from formula import Formula
 from regras import Regras
 from ramo import Ramo
 import copy
 
-
 class Tableau:
     def __init__(self, premissas=None, conclusoes=None):
-        self.premissas = premissas if premissas else []
-        self.conclusoes = conclusoes if conclusoes else []
+        self.stack = []           # pilha de ramos 
+        self.branch = Ramo([])    # ramo atual
 
-        # Vetores principais
-        self.branch = Ramo([])   # ramo atual
-        self.stack = []          # pilha de ramos (backtracking)
+        premissas = premissas or []
+        conclusoes = conclusoes or []
 
-        # inicializa o ramo raiz com premissas (T) e conclusões (F)
-        for p in self.premissas:
-            f = Formula(p.tipo, 'T', p.esquerda, p.direita, p.atomo)
-            self.branch.formulas.append(f)
-        for c in self.conclusoes:
-            f = Formula(c.tipo, 'F', c.esquerda, c.direita, c.atomo)
-            self.branch.formulas.append(f)
+        # premissas como verdadeiras, conclusões como falsas
+        for p in premissas:
+            self.branch.formulas.append(p.as_T())
+        for c in conclusoes:
+            self.branch.formulas.append(c.as_F())
 
-    def aplicar_regras(self, formula):
-        """Aplica α ou β, se possível, mostrando passo a passo"""
-        novas = Regras.expandir_alpha(formula)
+    def aplicar_regras(self, f):
+        #Tenta expandir α ou β
+
+        # α = adiciona sempre no mesmo ramo
+        novas = Regras.expandir_alpha(f)
         if novas:
-            print(f"\nAplicando regra α em {formula}")
-            for f in novas:
-                print("   Adiciona:", f)
-                self.branch.formulas.append(f)
-            print("Ramo atual:", self.branch)
+            for nf in novas:
+                self.branch.formulas.append(nf)
             return True
 
-        novas = Regras.expandir_beta(formula)
+        # β = gera ramificações
+        novas = Regras.expandir_beta(f)
         if novas:
-            print(f"\nAplicando regra β em {formula}")
-            # β gera ramificações → guardar na pilha
-            for ramo in novas[1:]:
-                copia = copy.deepcopy(self.branch)
-                copia.formulas += ramo
-                self.stack.append(copia)
-                print("   Novo ramo (empilhado):", copia)
+            # primeira ramificação no ramo atual
+            self.branch.formulas.extend(novas[0])
 
-            # segue com a primeira ramificação no branch atual
-            for f in novas[0]:
-                print("   Adiciona:", f)
-                self.branch.formulas.append(f)
-            print("Ramo atual:", self.branch)
+            # as demais ramificações vão para a pilha
+            for ramo_extra in novas[1:]:
+                copia = copy.deepcopy(self.branch)
+                copia.formulas = self.branch.formulas[:-len(novas[0])] + ramo_extra
+                copia.expanded = set(self.branch.expanded)  # manter histórico
+                self.stack.append(copia)
             return True
 
         return False
 
     def expandir(self):
-        """Loop principal do tableau"""
+        """Expande até fechar ou achar contraexemplo"""
         while True:
-            # 1. Verifica contradição imediata
+            # 1. Contradição → ramo fechado
             if self.branch.contem_contradicao():
-                print("\n*** Ramo fechado por contradição:", self.branch)
+                print("Fechou:", self.branch)
                 if not self.stack:
-                    return True  # todos os ramos fecharam
+                    return True  # todos fecharam
                 self.branch = self.stack.pop()
-                print("\n>>> Retomando ramo da pilha:", self.branch)
                 continue
 
-            # 2. Se o ramo só tem átomos (saturado)
+            # 2. Se está saturado (só átomos)
             if self.branch.esta_saturado():
+                print("Aberto:", self.branch)
                 if not self.stack:
-                    print("\n*** Ramo aberto e saturado:", self.branch)
-                    return False  # sobrou ramo aberto
-                else:
-                    self.branch = self.stack.pop()
-                    print("\n>>> Retomando ramo da pilha:", self.branch)
-                    continue
+                    return False  # sobrou aberto
+                self.branch = self.stack.pop()
+                continue
 
-            # 3. Procura uma fórmula não atômica não expandida
+            # 3. Pega próxima fórmula não expandida
             escolhida = None
             for f in self.branch.formulas:
                 if not f.is_atom() and str(f) not in self.branch.expanded:
@@ -84,19 +72,21 @@ class Tableau:
                 self.branch.expanded.add(str(escolhida))
                 self.aplicar_regras(escolhida)
             else:
-                # Nenhuma fórmula restante para expandir → saturado
+                # nada a expandir → saturado
+                print("Aberto:", self.branch)
                 if not self.stack:
-                    print("\n*** Ramo aberto e saturado:", self.branch)
                     return False
-                else:
-                    self.branch = self.stack.pop()
-                    print("\n>>> Retomando ramo da pilha:", self.branch)
+                self.branch = self.stack.pop()
+
+    def obter_contraexemplo(self):
+        """Extrai um modelo dos átomos restantes do ramo aberto"""
+        return {f.atomo: (f.rotulo == 'T')
+                for f in self.branch.formulas if f.is_atom()}
 
     def prova(self):
         print("Ramo inicial:", self.branch)
-        resultado = self.expandir()
-        if resultado:
-            print("\nSequente válido (tableau fechado).")
+        fechado = self.expandir()
+        if fechado:
+            print("Sequente válido.")
         else:
-            print("\nSequente inválido (ramo aberto encontrado).")
-        print("Ramo final:", self.branch)
+            print("Sequente inválido. Contraexemplo:", self.obter_contraexemplo())
