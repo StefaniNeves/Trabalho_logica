@@ -1,4 +1,4 @@
-# Tableaux Analítico – Implementação em Python
+# Tableaux Analítico – Implementação em Python (Trabalho desenvolvido em equipe- Stéfani,Guilherme,Felipe)
 
 ## 📘 Descrição do Projeto
 
