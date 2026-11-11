@@ -56,4 +56,15 @@ Implementar em **Python**, pela sua simplicidade e expressividade em manipulaç�
 
 ### 8) Documentação
 - [ ] Elaborar este README.  
-- [ ] Produzir relatório final e exemplos de execução.  
+- [ ] Produzir relatório final e exemplos de execução.
+
+      
+## 👩‍💻 Minha Contribuição- Stéfani Rodrigues Neves 
+
+O projeto foi desenvolvido em equipe, com divisão de responsabilidades entre os integrantes. Minha participação foi voltada à implementação de dois módulos principais:
+
+- **regras.py:** desenvolvimento da classe `Regras`, responsável pela implementação das regras de expansão alfa (α) e beta (β) utilizadas no método Tableaux Analítico.
+- **formula.py:** desenvolvimento da classe `Formula`, responsável pela representação das fórmulas proposicionais, identificação dos operadores lógicos e manipulação dos rótulos de verdadeiro (T) e falso (F).
+
+Além dessas implementações, participei do desenvolvimento colaborativo do projeto, contribuindo para a construção da solução em equipe.
+
